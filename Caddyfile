@@ -1,0 +1,26 @@
+{
+    email desmond@workflow.sg
+}
+
+workflow.sg {
+    redir https://www.workflow.sg{uri}
+}
+
+www.workflow.sg {
+    encode gzip zstd
+
+    @api path /api/*
+    handle @api {
+        reverse_proxy backend:3000
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}

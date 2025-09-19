@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workflow SG | Orchestrate Teams with Confidence</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">WSG</span>
+        <span class="brand-name">Workflow SG</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#capabilities">Capabilities</a>
+        <a href="#pipeline">Blueprint</a>
+        <a href="#updates">Updates</a>
+        <a href="#trial" class="primary-link">Start Free Trial</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <h1>Bring clarity to every cross-functional workflow.</h1>
+          <p>
+            Workflow SG orchestrates your automation, compliance, and analytics so Singapore-based teams can deliver with confidence.
+          </p>
+          <div class="hero-actions">
+            <button id="primary-cta">Build a Pipeline</button>
+            <button class="ghost" id="request-demo">Request a Guided Demo</button>
+          </div>
+          <ul class="badge-row">
+            <li>GovTech Ready</li>
+            <li>ISO 27001</li>
+            <li>PDPA Compliant</li>
+          </ul>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="workflow-grid">
+            <div class="node accent">Intake</div>
+            <div class="node">Human Review</div>
+            <div class="node">Automation</div>
+            <div class="node accent">Compliance</div>
+            <div class="node">Analytics</div>
+          </div>
+          <p class="workflow-caption">Plan, automate, and audit every step.</p>
+        </div>
+      </section>
+
+      <section id="capabilities" class="card-grid">
+        <header>
+          <h2>Capabilities that adapt to your operation</h2>
+          <p>Mix visual tooling with policy guardrails so every workflow stays compliant and efficient.</p>
+        </header>
+        <div id="capability-cards" class="cards" role="list"></div>
+      </section>
+
+      <section id="pipeline" class="pipeline">
+        <h2>Blueprint a workflow in minutes</h2>
+        <ol class="pipeline-steps">
+          <li>
+            <h3>Model</h3>
+            <p>Select reusable stages from the Singapore GovStack library or import BPMN files.</p>
+          </li>
+          <li>
+            <h3>Automate</h3>
+            <p>Assign bots, human approvals, and SLA timers with real-time validation.</p>
+          </li>
+          <li>
+            <h3>Monitor</h3>
+            <p>Stream telemetry into Observability Hub to detect bottlenecks before they impact users.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="updates" class="updates">
+        <header>
+          <h2>Product updates</h2>
+          <p>Follow the latest releases and integration highlights.</p>
+        </header>
+        <ul id="update-feed" class="update-feed"></ul>
+      </section>
+
+      <section id="trial" class="cta">
+        <div>
+          <h2>Ready to orchestrate better workflows?</h2>
+          <p>Deploy Workflow SG in your sandbox and run a guided pilot with our onboarding team.</p>
+        </div>
+        <form id="trial-form" class="cta-form">
+          <label>
+            Work Email
+            <input type="email" name="email" placeholder="you@agency.gov.sg" required />
+          </label>
+          <label>
+            Team Size
+            <select name="size" required>
+              <option value="" disabled selected>Select team size</option>
+              <option value="1-10">1-10</option>
+              <option value="11-50">11-50</option>
+              <option value="51-200">51-200</option>
+              <option value="200+">200+</option>
+            </select>
+          </label>
+          <button type="submit">Book Onboarding Call</button>
+          <p class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">Workflow SG</div>
+      <ul class="footer-links">
+        <li><a href="#">Platform Status</a></li>
+        <li><a href="#">Security Center</a></li>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Contact Support</a></li>
+      </ul>
+      <p class="footer-meta">© <span id="year"></span> Workflow SG. Built with care in Singapore.</p>
+    </footer>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
