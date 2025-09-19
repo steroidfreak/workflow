@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   frontend:
     build:
@@ -7,6 +9,13 @@ services:
     restart: unless-stopped
     expose:
       - "80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+    networks:
+      - web
 
   backend:
     build:
@@ -19,11 +28,21 @@ services:
       NODE_ENV: production
     expose:
       - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 20
+    networks:
+      - web
 
   caddy:
     image: caddy:2.8-alpine
     container_name: workflow-caddy
     restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
     ports:
       - "80:80"
       - "443:443"
@@ -31,10 +50,18 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on:
-      - frontend
-      - backend
+    networks:
+      - web
+    # tiny droplet friendliness (optional)
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
 volumes:
   caddy_data:
   caddy_config:
+
+networks:
+  web:
+    driver: bridge

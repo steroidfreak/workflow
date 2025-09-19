@@ -1,25 +1,29 @@
 {
     email desmond@workflow.sg
+    # admin off
 }
 
+# Canonical host: redirect apex -> www (both http/https traffic)
 workflow.sg {
-    redir https://www.workflow.sg{uri}
+    redir https://www.workflow.sg{uri} permanent
 }
 
 www.workflow.sg {
-    encode gzip zstd
+    encode zstd gzip
 
-    @api path /api/*
+    # API to backend (match /api and /api/..)
+    @api path /api*
     handle @api {
         reverse_proxy backend:3000
     }
 
+    # Everything else -> frontend
     handle {
         reverse_proxy frontend:80
     }
 
     header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains" # remove 'preload' unless you meet all requirements
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
     }
