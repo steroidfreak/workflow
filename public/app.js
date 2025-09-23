@@ -79,3 +79,148 @@ hydrateContent();
 trialForm.addEventListener('submit', handleFormSubmit);
 yearEl.textContent = new Date().getFullYear();
 
+setupChatWidget();
+
+
+
+function setupChatWidget() {
+  const chatLauncher = document.getElementById('chat-launcher');
+  const chatPanel = document.getElementById('chat-panel');
+  const chatClose = document.getElementById('chat-close');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatStatus = document.getElementById('chat-status');
+
+  if (!chatLauncher || !chatPanel || !chatClose || !chatForm || !chatInput || !chatMessages || !chatStatus) {
+    return;
+  }
+
+  const sendButton = chatForm.querySelector('button[type="submit"]');
+  if (!sendButton) {
+    return;
+  }
+
+  const welcomeMessage = 'Hi there! I am the Workflow SG assistant. Ask about automation workflows, compliance guardrails, or onboarding support.';
+  let chatHistory = [
+    { role: 'assistant', content: welcomeMessage }
+  ];
+  let isOpen = false;
+  let isSending = false;
+
+  const appendChatMessage = (role, content) => {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-message chat-message--${role}`;
+    bubble.textContent = content;
+    chatMessages.appendChild(bubble);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  };
+
+  const setStatus = (message) => {
+    chatStatus.textContent = message;
+  };
+
+  appendChatMessage('assistant', welcomeMessage);
+  setStatus('Assistant online');
+
+  const toggleChat = (open) => {
+    if (open === isOpen) {
+      return;
+    }
+
+    isOpen = open;
+    chatPanel.hidden = !open;
+    chatLauncher.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+    if (open) {
+      window.requestAnimationFrame(() => {
+        chatInput.focus();
+      });
+    } else {
+      chatLauncher.focus();
+    }
+  };
+
+  chatLauncher.addEventListener('click', () => {
+    toggleChat(!isOpen);
+  });
+
+  chatClose.addEventListener('click', () => {
+    toggleChat(false);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isOpen) {
+      toggleChat(false);
+    }
+  });
+
+  chatForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (isSending) {
+      return;
+    }
+
+    const message = chatInput.value.trim();
+    if (!message) {
+      chatInput.focus();
+      return;
+    }
+
+    appendChatMessage('user', message);
+    chatInput.value = '';
+    isSending = true;
+    setStatus('Assistant is thinking...');
+    chatInput.disabled = true;
+    sendButton.disabled = true;
+
+    const payload = {
+      message,
+      history: chatHistory.slice(-6)
+    };
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        const errorMessage = typeof data.error === 'string' ? data.error : `Request failed: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      const reply = typeof data.reply === 'string' ? data.reply.trim() : '';
+
+      if (!reply) {
+        throw new Error('Assistant response missing.');
+      }
+
+      appendChatMessage('assistant', reply);
+      chatHistory = [
+        ...chatHistory.slice(-6),
+        { role: 'user', content: message },
+        { role: 'assistant', content: reply }
+      ];
+      setStatus('Assistant online');
+    } catch (error) {
+      console.error('Chat request failed', error);
+      const fallback = typeof error?.message === 'string' && error.message.trim()
+        ? error.message.trim()
+        : 'I could not reach our assistant right now. Please try again shortly or contact support@workflow.sg.';
+      appendChatMessage('assistant', fallback);
+      setStatus('Assistant unavailable');
+    } finally {
+      isSending = false;
+      chatInput.disabled = false;
+      sendButton.disabled = false;
+      chatInput.focus();
+    }
+  });
+}
