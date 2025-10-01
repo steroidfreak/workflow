@@ -9,6 +9,49 @@ import { assistant, run, user } from "@openai/agents";
 
 import { agent } from "./agent.js";
 
+const workflowDomainSuffix = ".workflow.sg";
+const parseOrigins = (value) =>
+  value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => entry.toLowerCase());
+
+const defaultAllowedOrigins = [
+  "https://workflow.sg",
+  "https://www.workflow.sg",
+  "https://pixsnap.workflow.sg",
+  "http://localhost",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://localhost:8080",
+  "http://127.0.0.1",
+  "http://127.0.0.1:3000",
+].map((origin) => origin.toLowerCase());
+
+const envAllowedOrigins = parseOrigins(process.env.ALLOWED_ORIGINS ?? "");
+
+const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  const normalizedOrigin = origin.toLowerCase();
+
+  if (allowedOrigins.has(normalizedOrigin)) {
+    return true;
+  }
+
+  if (normalizedOrigin.endsWith(workflowDomainSuffix)) {
+    return true;
+  }
+
+  return false;
+};
+
 const app = express();
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
@@ -43,9 +86,30 @@ const updates = [
   },
 ];
 
-app.use(cors());
+app.use(
+  cors({
+    origin: (requestOrigin, callback) => {
+      if (isAllowedOrigin(requestOrigin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed"));
+    },
+    credentials: true,
+  }),
+);
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
+
+app.use((error, _req, res, next) => {
+  if (error && error.message === "Origin not allowed") {
+    res.status(403).json({ error: "Origin not allowed" });
+    return;
+  }
+
+  next(error);
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({
